@@ -1,4 +1,4 @@
-SRC = 	main.c
+SRC = 	main.c path.c error.c
 
 #SRC_BONUS =	main.c
 

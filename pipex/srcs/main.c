@@ -1,36 +1,35 @@
 #include "pipex.h"
 
-void	error_message(void)
-{
-	perror("The program detected an error ");
-	exit(1);
-}
-
 void	child(char **argv, char **env, int fds[2])
 {
 	char	**cmd;
+	char	*path;
+
 	
+	fds[0] = open(argv[1], O_RDONLY);
+	if (fds[0] == -1)
+			error_message();
 	cmd = ft_split(argv[2], ' ');
 	if (dup2(fds[0], 0) == -1 || close(fds[1]) == -1)
 		error_message();
-	
-	if (execve(argv[1], cmd, env) == -1)
-	{
-		
+	path = path_for_execve(env, cmd[0]);
+	if (execve(path, cmd, env) == -1)
 		error_message();
-		printf("555\n");
-	}
-	
 }
 
 void	parent(char **argv, char **env, int fds[2])
 {
 	char	**cmd;
+	char	*path;
 
+	fds[1] = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC);
+	if (fds[1] == -1)
+			error_message();
 	cmd = ft_split(argv[3], ' ');
-	if (dup2(fds[1], 0) == -1 || close(fds[0]) == -1)
+	if (dup2(fds[1], 1) == -1)
 		error_message();
-	if (execve(argv[4], cmd, env) == -1)
+	path = path_for_execve(env, cmd[0]);
+	if (execve(path, cmd, env) == -1)
 		error_message();
 }
 
@@ -49,17 +48,14 @@ int	main(int argc, char **argv, char **env)
 			acc[1] = access(argv[4], W_OK);
 		if (acc[0] == -1 || acc[1] == -1)
 			error_message();
-		fds[0] = open(argv[1], O_RDONLY);
-		fds[1] = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC);
-		if (fds[0] == -1 || fds[1] == -1)
+		if (pipe(fds) == -1)
 			error_message();
 		pid = fork();
 		if (pid == -1)
 			error_message();
 		if (pid == 0)
 			return (child(argv, env, fds), 0);
-		
-		pid = wait(&status);
+		pid = wait(&status);	
 		if (status != 0)
 			return (1);
 		parent(argv, env, fds);

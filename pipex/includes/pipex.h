@@ -10,7 +10,15 @@
 # include <fcntl.h>
 # include <stdlib.h>
 
-void	error(char *str);
+void	error_message(void);
+
+char	*good_path(char	*env, char *cmd);
+
+char	*path_for_execve(char **env, char *cmd);
+
+void	child(char **argv, char **env, int fds[2]);
+
+void	parent(char **argv, char **env, int fds[2]);
 
 int		main(int argc, char **argv, char **env);
 
