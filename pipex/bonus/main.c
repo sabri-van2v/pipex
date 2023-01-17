@@ -3,9 +3,14 @@
 void	check_access(char **argv)
 {
 	int	acc[2];
+	int	i;
 
+	i = 0;
+	while (argv[i])
+		i++;
+	i--;
 	acc[0] = access(argv[1], R_OK);
-	acc[1] = access(argv[4], W_OK);
+	acc[1] = access(argv[i], W_OK);
 	if (acc[0] == -1 || acc[1] == -1)
 		error_message();
 }
@@ -58,23 +63,20 @@ int	main(int argc, char **argv, char **env)
 	pid_t	pid;
 	int		status;
 
-	if (argc == 5)
-	{
-		check_access(argv);
-		if (pipe(pipe_data) == -1)
-			error_message();
-		pid = fork();
-		if (pid == -1)
-			error_message();
-		if (pid == 0)
-			return (child(argv, env, pipe_data), 0);
-		pid = wait(&status);
-		if (pid == -1)
-			error_message();
-		if (status != 0)
-			return (1);
-		parent(argv, env, pipe_data);
-	}
-	else
-		ft_putstr_fd("Bad arguments !\n$./pipex file1 cmd1 cmd2 file2\n", 2);
+	if (argc < 5)
+		return (ft_putstr_fd("Bad arguments !\n$./pipex file1 cmd1 cmd2 file2\n", 2), 1);
+	check_access(argv);
+	if (pipe(pipe_data) == -1)
+		error_message();
+	pid = fork();
+	if (pid == -1)
+		error_message();
+	if (pid == 0)
+		child(argv, env, pipe_data);
+	pid = wait(&status);
+	if (pid == -1)
+		error_message();
+	if (status != 0)
+		return (1);
+	parent(argv, env, pipe_data);
 }
