@@ -1,65 +1,84 @@
 #include "pipex.h"
 
-void	child(char **argv, char **env, int fds[2])
+void	check_access(char **argv)
 {
-	char	**cmd;
-	char	*path;
+	int	acc[2];
 
-	
-	fds[0] = open(argv[1], O_RDONLY);
-	if (fds[0] == -1)
-			error_message();
-	cmd = ft_split(argv[2], ' ');
-	if (dup2(fds[0], 0) == -1 || close(fds[1]) == -1)
-		error_message();
-	path = path_for_execve(env, cmd[0]);
-	if (execve(path, cmd, env) == -1)
+	acc[0] = access(argv[1], R_OK);
+	acc[1] = access(argv[4], W_OK);
+	if (acc[0] == -1 || acc[1] == -1)
 		error_message();
 }
 
-void	parent(char **argv, char **env, int fds[2])
+void	child(char **argv, char **env, int pipe_data[2])
 {
 	char	**cmd;
 	char	*path;
+	int		file;
 
-	fds[1] = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC);
-	if (fds[1] == -1)
+	cmd = NULL;
+	path = NULL;
+	file = open(argv[1], O_RDONLY);
+	if (file == -1)
+			error_message();
+	cmd = ft_split(argv[2], ' ');
+	if (!cmd)
+		(free_all(pipe_data, file, NULL, NULL), error_message());
+	if (dup2(pipe_data[1], 1) == -1 || dup2(file, 0) == -1 || close(pipe_data[0]) == -1)
+		(free_all(pipe_data, file, cmd, NULL), error_message());
+	path = path_for_execve(env, cmd[0]);
+	if (!path)
+		(free_all(pipe_data, file, cmd, NULL), error_message());
+	if (execve(path, cmd, env) == -1)
+		(free_all(pipe_data, file, cmd, path), error_message());
+}
+
+void	parent(char **argv, char **env, int pipe_data[2])
+{
+	char	**cmd;
+	char	*path;
+	int		file;
+
+	cmd = NULL;
+	path = NULL;
+	file = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC);
+	if (file == -1)
 			error_message();
 	cmd = ft_split(argv[3], ' ');
-	if (dup2(fds[1], 1) == -1)
-		error_message();
+	if (!cmd)
+		(free_all(pipe_data, file, NULL, NULL), error_message());
+	if (dup2(pipe_data[0], 0) == -1 || dup2(file, 1) == -1 || close(pipe_data[1]) == -1)
+		(free_all(pipe_data, file, cmd, NULL), error_message());
 	path = path_for_execve(env, cmd[0]);
+	if (!path)
+		(free_all(pipe_data, file, cmd, NULL), error_message());
 	if (execve(path, cmd, env) == -1)
-		error_message();
+		(free_all(pipe_data, file, cmd, path), error_message());
 }
 
 int	main(int argc, char **argv, char **env)
 {
-	int		fds[2];
-	int		acc[2];
+	int		pipe_data[2];
 	pid_t	pid;
 	int		status;
 
 	if (argc == 5)
 	{
-		acc[0] = access(argv[1], R_OK);
-		acc[1] = access(argv[4], F_OK);
-		if (acc[1] != -1)
-			acc[1] = access(argv[4], W_OK);
-		if (acc[0] == -1 || acc[1] == -1)
-			error_message();
-		if (pipe(fds) == -1)
+		check_access(argv);
+		if (pipe(pipe_data) == -1)
 			error_message();
 		pid = fork();
 		if (pid == -1)
 			error_message();
 		if (pid == 0)
-			return (child(argv, env, fds), 0);
-		pid = wait(&status);	
+			return (child(argv, env, pipe_data), 0);
+		pid = wait(&status);
+		if (pid == -1)
+			error_message();
 		if (status != 0)
 			return (1);
-		parent(argv, env, fds);
+		parent(argv, env, pipe_data);
 	}
 	else
-		ft_putstr_fd("Bad arguments !\nEx : ./pipex file1 cmd1 cmd2 file2\n", 2);
+		ft_putstr_fd("Bad arguments !\n$./pipex file1 cmd1 cmd2 file2\n", 2);
 }

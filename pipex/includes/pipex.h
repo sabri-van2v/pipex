@@ -9,16 +9,27 @@
 # include <sys/stat.h>
 # include <fcntl.h>
 # include <stdlib.h>
+# include <errno.h>
+
+void	free_split(char **split);
+
+void	*free_path(char **paths, char *fill_path, char *final_path);
+
+void	free_all(int pipe_data[2], int fd_file, char **cmd, char *path);
 
 void	error_message(void);
 
-char	*good_path(char	*env, char *cmd);
+char	*good_path(char **paths, char *fill_path, char *final_path, char *cmd);
+
+char	*find_path(char	*env, char *cmd);
 
 char	*path_for_execve(char **env, char *cmd);
 
-void	child(char **argv, char **env, int fds[2]);
+void	check_access(char **argv);
 
-void	parent(char **argv, char **env, int fds[2]);
+void	child(char **argv, char **env, int pipe_data[2]);
+
+void	parent(char **argv, char **env, int pipe_data[2]);
 
 int		main(int argc, char **argv, char **env);
 
