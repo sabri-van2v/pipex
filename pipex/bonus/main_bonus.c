@@ -1,4 +1,16 @@
-#include "pipex.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/01/19 15:16:29 by marvin            #+#    #+#             */
+/*   Updated: 2023/01/19 15:16:29 by marvin           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "pipex_bonus.h"
 
 void	check_access(char **argv)
 {
@@ -36,7 +48,7 @@ void	child(char **argv, char **env, int pipe_data[2])
 		(free_all(pipe_data, file, cmd, path), error_message());
 }
 
-void	parent(char **argv, char **env, int pipe_data[2])
+void	parent(int argc, char **argv, char **env, int pipe_data[2])
 {
 	char	**cmd;
 	char	*path;
@@ -44,10 +56,10 @@ void	parent(char **argv, char **env, int pipe_data[2])
 
 	cmd = NULL;
 	path = NULL;
-	file = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC);
+	file = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC);
 	if (file == -1)
 			error_message();
-	cmd = ft_split(argv[3], ' ');
+	cmd = ft_split(argv[argc - 2], ' ');
 	if (!cmd)
 		(free_all(pipe_data, file, NULL, NULL), error_message());
 	path = path_for_execve(env, cmd[0]);
@@ -64,8 +76,9 @@ int	main(int argc, char **argv, char **env)
 	int		status;
 
 	if (argc < 5)
-		return (ft_putstr_fd("Bad arguments !\n$./pipex file1 cmd1 cmd2 file2\n", 2), 1);
-	check_access(argv);
+		return (ft_putstr_fd("hey\n", 2), 1);
+	if (!ft_strncmp("here_doc", argv[1], ft_strlen(argv[1])) && argc == 6)
+		return (here_doc(argv, env));
 	if (pipe(pipe_data) == -1)
 		error_message();
 	pid = fork();
@@ -78,5 +91,7 @@ int	main(int argc, char **argv, char **env)
 		error_message();
 	if (status != 0)
 		return (1);
-	parent(argv, env, pipe_data);
+	if (argc > 5)
+		many_pipes(argc, argv, env, pipe_data);
+	parent(argc, argv, env, pipe_data);
 }

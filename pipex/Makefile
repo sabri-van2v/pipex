@@ -1,22 +1,23 @@
 SRC = 	main.c path.c error.c
 
-#SRC_BONUS =	main.c
+SRC_BONUS =	main_bonus.c path_bonus.c error_bonus.c \
+		here_doc_bonus.c many_pipes_bonus.c
 
 SRCS = 	${addprefix srcs/, ${SRC}}
 
-#SRCS_BONUS = ${addprefix bonus/, ${SRC_BONUS}}
+SRCS_BONUS = ${addprefix bonus/, ${SRC_BONUS}}
 
 OBJ = 	${addprefix binaries/, ${SRC}}
 
 OBJS = 	${OBJ:%.c=%.o}
 
-#OBJ_BONUS =	${addprefix binaries/, ${SRC_BONUS}}
+OBJ_BONUS =	${addprefix binaries/, ${SRC_BONUS}}
 
-#OBJS_BONUS = ${OBJ_BONUS:%.c=%.o}
+OBJS_BONUS = ${OBJ_BONUS:%.c=%.o}
 
 NAME = 	pipex
 
-#NAME_BONUS = checker
+NAME_BONUS = pipex_bonus
 
 MAKELIB = @make -C Libft
 
@@ -34,20 +35,20 @@ INCLUDES = Libft/includes/gnl Libft/includes/libc Libft/includes/ptf includes/
 
 HEADER = includes/pipex.h
 
-#HEADER_BONUS = includes/push_swap_bonus.h
+HEADER_BONUS = includes/pipex_bonus.h
 
 binaries/%.o: srcs/%.c ${HEADER} Libft/libft.a | binaries
 	${CC} ${CFLAGS} -c $< -o $@ ${addprefix -I, ${INCLUDES}}
 
-#binaries/%.o: bonus/%.c ${HEADER_BONUS} Libft/libft.a | binaries
-#	${MAKEBIN}
-#	${CC} ${CFLAGS} -c $< -o $@ ${addprefix -I, ${INCLUDES}}
+binaries/%.o: bonus/%.c ${HEADER_BONUS} Libft/libft.a | binaries
+	${MAKEBIN}
+	${CC} ${CFLAGS} -c $< -o $@ ${addprefix -I, ${INCLUDES}}
 
 ${NAME}: ${OBJS}
 	${CC} -o ${NAME} ${OBJS} -LLibft -lft
 
-#${NAME_BONUS}: ${OBJS_BONUS}
-#	${CC} -o ${NAME_BONUS} ${OBJS_BONUS} -LLibft -lft
+${NAME_BONUS}: ${OBJS_BONUS}
+	${CC} -o ${NAME_BONUS} ${OBJS_BONUS} -LLibft -lft
 
 all: ${NAME}
 
@@ -57,14 +58,14 @@ Libft/libft.a:
 binaries:
 	${MAKEBIN}
 
-#bonus: ${NAME_BONUS}
+bonus: ${NAME_BONUS}
 
 clean:
 	 ${RM} -r binaries
 	 make clean -C Libft
 
 fclean: clean
-	 ${RM} ${NAME}
+	 ${RM} ${NAME} ${NAME_BONUS}
 	 make fclean -C Libft
 
 re: fclean all
