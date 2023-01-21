@@ -89,15 +89,10 @@ int	main(int argc, char **argv, char **env)
 		child(argv, env, pipe_data);
 	pid = wait(&status);
 	close(pipe_data[1]);
-	if (pid == -1)
-		error_message();
+	if (close(pipe_data[1]) || pid == -1)
+		(close(pipe_data[0]), error_message());
 	if (status != 0)
 		return (1);
 	many_pipes(argc, argv, env, &pipe_data[0]);
-	pid = fork();
-	if (pid == -1)
-		error_message();
-	if (pid == 0)
-		parent(argc, argv, env, pipe_data);
-	waitpid(pid, NULL, 1);
+	parent(argc, argv, env, pipe_data);
 }

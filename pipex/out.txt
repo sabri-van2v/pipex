@@ -1,0 +1,11 @@
+binaries
+bonus
+file1.txt
+file2.txt
+includes
+Libft
+Makefile
+out.txt
+pipex
+pipex_bonus
+srcs

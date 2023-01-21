@@ -32,7 +32,7 @@ char	*get_doc(char *argv)
 	return (str);
 }
 
-void	child_here_doc(int pipe_data[2], char **argv)
+int	child_here_doc(int pipe_data[2], char **argv)
 {
 	char	*str;
 
@@ -48,7 +48,7 @@ void	parent_here_doc(int pipe_data[2], char **argv, char **env)
 
 	cmd = NULL;
 	path = NULL;
-	file = open(argv[5], O_WRONLY | O_APPEND | O_CREAT | O_TRUNC);
+	file = open(argv[5], O_WRONLY | O_APPEND | O_CREAT);
 	if (file == -1)
 		error_message();
 	cmd = ft_split(argv[4], ' ');

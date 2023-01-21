@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipex_bonus.h                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: svan-de- <svan-de-@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/01/22 00:10:02 by svan-de-          #+#    #+#             */
+/*   Updated: 2023/01/22 00:10:02 by svan-de-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PIPEX_BONUS_H
 # define PIPEX_BONUS_H
 
@@ -24,13 +36,13 @@ void	pass(char *argv, char **env, int pipe_link[2], int pipe_data);
 
 void	many_pipes(int argc, char **argv, char **env, int *pipe_data);
 
-char    *get_doc(char *argv);
+char	*get_doc(char *argv);
 
-void	child_here_doc(int pipe_data[2], char **argv);
+int		child_here_doc(int pipe_data[2], char **argv);
 
 void	parent_here_doc(int pipe_data[2], char **argv, char **env);
 
-int 	here_doc(char **argv, char **env);
+int		here_doc(char **argv, char **env);
 
 char	*good_path(char **paths, char *fill_path, char *final_path, char *cmd);
 
