@@ -37,12 +37,13 @@ void	child(char **argv, char **env, int pipe_data[2])
 	path = NULL;
 	file = open(argv[1], O_RDONLY);
 	if (file == -1)
-			error_message();
+		error_message();
 	cmd = ft_split(argv[2], ' ');
 	if (!cmd)
 		(free_all(pipe_data, file, NULL, NULL), error_message());
 	path = path_for_execve(env, cmd[0]);
-	if (!path || dup2(pipe_data[1], 1) == -1 || dup2(file, 0) == -1 || close(pipe_data[0]) == -1)
+	if (!path || dup2(pipe_data[1], 1) == -1 || dup2(file, 0) == -1
+		|| close(pipe_data[0]) == -1)
 		(free_all(pipe_data, file, cmd, NULL), error_message());
 	if (execve(path, cmd, env) == -1)
 		(free_all(pipe_data, file, cmd, path), error_message());
@@ -58,12 +59,12 @@ void	parent(int argc, char **argv, char **env, int pipe_data[2])
 	path = NULL;
 	file = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC);
 	if (file == -1)
-			error_message();
+		error_message();
 	cmd = ft_split(argv[argc - 2], ' ');
 	if (!cmd)
 		(free_all(pipe_data, file, NULL, NULL), error_message());
 	path = path_for_execve(env, cmd[0]);
-	if (!path || dup2(pipe_data[0], 0) == -1 || dup2(file, 1) == -1 || close(pipe_data[1]) == -1)
+	if (!path || dup2(pipe_data[0], 0) == -1 || dup2(file, 1) == -1)
 		(free_all(pipe_data, file, cmd, NULL), error_message());
 	if (execve(path, cmd, env) == -1)
 		(free_all(pipe_data, file, cmd, path), error_message());
@@ -76,7 +77,7 @@ int	main(int argc, char **argv, char **env)
 	int		status;
 
 	if (argc < 5)
-		return (ft_putstr_fd("hey\n", 2), 1);
+		return (ft_putstr_fd("Bad arguments\n", 2), 1);
 	if (!ft_strncmp("here_doc", argv[1], ft_strlen(argv[1])) && argc == 6)
 		return (here_doc(argv, env));
 	if (pipe(pipe_data) == -1)
@@ -87,11 +88,16 @@ int	main(int argc, char **argv, char **env)
 	if (pid == 0)
 		child(argv, env, pipe_data);
 	pid = wait(&status);
+	close(pipe_data[1]);
 	if (pid == -1)
 		error_message();
 	if (status != 0)
 		return (1);
-	if (argc > 5)
-		many_pipes(argc, argv, env, pipe_data);
-	parent(argc, argv, env, pipe_data);
+	many_pipes(argc, argv, env, &pipe_data[0]);
+	pid = fork();
+	if (pid == -1)
+		error_message();
+	if (pid == 0)
+		parent(argc, argv, env, pipe_data);
+	waitpid(pid, NULL, 1);
 }

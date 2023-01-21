@@ -6,7 +6,7 @@
 /*   By: svan-de- <svan-de-@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/10 08:59:32 by svan-de-          #+#    #+#             */
-/*   Updated: 2022/12/22 00:31:46 by svan-de-         ###   ########.fr       */
+/*   Updated: 2023/01/21 20:53:29 by svan-de-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <stddef.h>
 # include <limits.h>
 # include <stdint.h>
+# include <stdio.h>
 
 typedef struct s_list
 {

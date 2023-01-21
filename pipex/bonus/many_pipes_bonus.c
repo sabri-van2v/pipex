@@ -12,43 +12,42 @@
 
 #include "pipex_bonus.h"
 
-void	pass(int i, char **argv, char **env, int pipe_data[2])
+void	pass(char *argv, char **env, int pipe_link[2], int pipe_data)
 {
 	char	**cmd;
 	char	*path;
 
 	cmd = NULL;
 	path = NULL;
-	cmd = ft_split(argv[i], ' ');
+	cmd = ft_split(argv, ' ');
 	path = path_for_execve(env, cmd[0]);
-    dup2(pipe_data[0], 0);
-    dup2(pipe_data[1], 1);
-	if (!path || dup2(pipe_data[0], 0) == -1)
-		(free_all(pipe_data, -1, cmd, NULL), error_message());
+	if (!path || dup2(pipe_data, 0) == -1 || dup2(pipe_link[1], 1) == -1)
+		error_message();
 	if (execve(path, cmd, env) == -1)
-		(free_all(pipe_data, -1, cmd, path), error_message());
+		error_message();
 }
 
-void	many_pipes(int argc, char **argv, char **env, int pipe_data[2])
+void	many_pipes(int argc, char **argv, char **env, int *pipe_data)
 {
 	pid_t	pid;
-	pid_t	check_wait;
-	int		status;
 	int		i;
+	int		pipe_link[2];
 
 	i = 3;
-	while (i < argc - 1)
+	while (i < argc - 2)
 	{
+		if (pipe(pipe_link) == -1)
+			error_message();
 		pid = fork();
 		if (pid == -1)
 			error_message();
 		if (pid == 0)
-			pass(i, argv, env, pipe_data);
-		check_wait = wait(&status);
-		if (check_wait == -1)
-			error_message();
-		if (status != 0)
-			exit (1);
-        i++;
+			pass(argv[i], env, pipe_link, *pipe_data);
+		dup2(pipe_link[0], *pipe_data);
+		close(pipe_link[1]);
+		close(pipe_link[0]);
+		i++;
 	}
+	waitpid(pid, NULL, 1);
 }
+

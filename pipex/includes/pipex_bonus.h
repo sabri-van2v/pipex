@@ -20,13 +20,13 @@ void	free_all(int pipe_data[2], int fd_file, char **cmd, char *path);
 
 void	error_message(void);
 
-void	pass(int i, char **argv, char **env, int pipe_data[2]);
+void	pass(char *argv, char **env, int pipe_link[2], int pipe_data);
 
-void	many_pipes(int argc, char **argv, char **env, int pipe_data[2]);
+void	many_pipes(int argc, char **argv, char **env, int *pipe_data);
 
-char    *get_doc(char **argv);
+char    *get_doc(char *argv);
 
-void	child_here_doc(int pipe_data[2], char **argv, char **env);
+void	child_here_doc(int pipe_data[2], char **argv);
 
 void	parent_here_doc(int pipe_data[2], char **argv, char **env);
 
