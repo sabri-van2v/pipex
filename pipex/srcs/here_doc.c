@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex_bonus.h"
+#include "pipex.h"
 
 char	*get_doc(char *argv)
 {
@@ -37,7 +37,9 @@ int	child_here_doc(int pipe_data[2], char **argv)
 	char	*str;
 
 	str = get_doc(argv[2]);
-	write(pipe_data[1], str, ft_strlen(str));
+	if (write(pipe_data[1], str, ft_strlen(str)) == -1)
+		(free(str), error_message());
+	return (0);
 }
 
 void	parent_here_doc(int pipe_data[2], char **argv, char **env)
@@ -72,7 +74,7 @@ int	here_doc(char **argv, char **env)
 		error_message();
 	pid = fork();
 	if (pid == 0)
-		return (child_here_doc(pipe_data, argv), 0);
+		return (child_here_doc(pipe_data, argv));
 	pid = wait(&status);
 	if (pid == -1)
 		error_message();

@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex_bonus.h"
+#include "pipex.h"
 
 void	pass(char *argv, char **env, int pipe_link[2], int pipe_data)
 {
@@ -52,4 +52,3 @@ void	many_pipes(int argc, char **argv, char **env, int *pipe_data)
 	}
 	waitpid(pid, NULL, 1);
 }
-

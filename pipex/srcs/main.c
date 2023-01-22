@@ -1,11 +1,28 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: marvin <marvin@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/01/19 15:16:29 by marvin            #+#    #+#             */
+/*   Updated: 2023/01/19 15:16:29 by marvin           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "pipex.h"
 
 void	check_access(char **argv)
 {
 	int	acc[2];
+	int	i;
 
+	i = 0;
+	while (argv[i])
+		i++;
+	i--;
 	acc[0] = access(argv[1], R_OK);
-	acc[1] = access(argv[4], W_OK);
+	acc[1] = access(argv[i], W_OK);
 	if (acc[0] == -1 || acc[1] == -1)
 		error_message();
 }
@@ -20,18 +37,19 @@ void	child(char **argv, char **env, int pipe_data[2])
 	path = NULL;
 	file = open(argv[1], O_RDONLY);
 	if (file == -1)
-			error_message();
+		error_message();
 	cmd = ft_split(argv[2], ' ');
 	if (!cmd)
 		(free_all(pipe_data, file, NULL, NULL), error_message());
 	path = path_for_execve(env, cmd[0]);
-	if (!path || dup2(pipe_data[1], 1) == -1 || dup2(file, 0) == -1 || close(pipe_data[0]) == -1)
+	if (!path || dup2(pipe_data[1], 1) == -1 || dup2(file, 0) == -1
+		|| close(pipe_data[0]) == -1)
 		(free_all(pipe_data, file, cmd, NULL), error_message());
 	if (execve(path, cmd, env) == -1)
 		(free_all(pipe_data, file, cmd, path), error_message());
 }
 
-void	parent(char **argv, char **env, int pipe_data[2])
+void	parent(int argc, char **argv, char **env, int pipe_data[2])
 {
 	char	**cmd;
 	char	*path;
@@ -39,14 +57,14 @@ void	parent(char **argv, char **env, int pipe_data[2])
 
 	cmd = NULL;
 	path = NULL;
-	file = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC);
+	file = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC);
 	if (file == -1)
-			error_message();
-	cmd = ft_split(argv[3], ' ');
+		error_message();
+	cmd = ft_split(argv[argc - 2], ' ');
 	if (!cmd)
 		(free_all(pipe_data, file, NULL, NULL), error_message());
 	path = path_for_execve(env, cmd[0]);
-	if (!path || dup2(pipe_data[0], 0) == -1 || dup2(file, 1) == -1 || close(pipe_data[1]) == -1)
+	if (!path || dup2(pipe_data[0], 0) == -1 || dup2(file, 1) == -1)
 		(free_all(pipe_data, file, cmd, NULL), error_message());
 	if (execve(path, cmd, env) == -1)
 		(free_all(pipe_data, file, cmd, path), error_message());
@@ -58,23 +76,23 @@ int	main(int argc, char **argv, char **env)
 	pid_t	pid;
 	int		status;
 
-	if (argc == 5)
-	{
-		check_access(argv);
-		if (pipe(pipe_data) == -1)
-			error_message();
-		pid = fork();
-		if (pid == -1)
-			error_message();
-		if (pid == 0)
-			return (child(argv, env, pipe_data), 0);
-		pid = wait(&status);
-		if (pid == -1)
-			error_message();
-		if (status != 0)
-			return (1);
-		parent(argv, env, pipe_data);
-	}
-	else
-		ft_putstr_fd("Bad arguments !\n$./pipex file1 cmd1 cmd2 file2\n", 2);
+	if (argc < 5)
+		return (ft_putstr_fd("Bad arguments\n", 2), 1);
+	if (!ft_strncmp("here_doc", argv[1], 8)
+		&& ft_strlen(argv[1]) == 8 && argc == 6)
+		return (here_doc(argv, env));
+	if (pipe(pipe_data) == -1)
+		error_message();
+	pid = fork();
+	if (pid == -1)
+		error_message();
+	if (pid == 0)
+		child(argv, env, pipe_data);
+	pid = wait(&status);
+	if (close(pipe_data[1]) || pid == -1)
+		(close(pipe_data[0]), error_message());
+	if (status != 0)
+		return (1);
+	many_pipes(argc, argv, env, &pipe_data[0]);
+	parent(argc, argv, env, pipe_data);
 }
