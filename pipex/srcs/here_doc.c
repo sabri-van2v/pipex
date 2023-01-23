@@ -16,17 +16,20 @@ char	*get_doc(char *argv)
 {
 	char	*reader;
 	char	*str;
+	char	*tmp;
 
 	reader = malloc(1);
 	reader[0] = '\0';
-	str = malloc(0);
+	tmp = malloc(0);
 	while (reader)
 	{
 		free(reader);
 		reader = get_next_line(0);
 		if (!ft_strncmp(reader, argv, ft_strlen(argv)))
 			break ;
-		str = ft_strjoin(str, reader);
+		str = ft_strjoin(tmp, reader);
+		free(tmp);
+		tmp = str;
 	}
 	free(reader);
 	return (str);
@@ -39,6 +42,7 @@ int	child_here_doc(int pipe_data[2], char **argv)
 	str = get_doc(argv[2]);
 	if (write(pipe_data[1], str, ft_strlen(str)) == -1)
 		(free(str), error_message());
+	free(str);
 	return (0);
 }
 
@@ -55,13 +59,13 @@ void	parent_here_doc(int pipe_data[2], char **argv, char **env)
 		error_message();
 	cmd = ft_split(argv[4], ' ');
 	if (!cmd)
-		(free_all(pipe_data, file, NULL, NULL), error_message());
+		(error_message());
 	path = path_for_execve(env, cmd[0]);
 	if (!path || dup2(pipe_data[0], 0) == -1 || dup2(file, 1) == -1
-		|| close(pipe_data[1]) == -1)
-		(free_all(pipe_data, file, cmd, NULL), error_message());
+		|| close(pipe_data[1]))
+		(error_message());
 	if (execve(path, cmd, env) == -1)
-		(free_all(pipe_data, file, cmd, path), error_message());
+		(error_message());
 }
 
 int	here_doc(char **argv, char **env)

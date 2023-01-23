@@ -41,17 +41,17 @@ void	*free_path(char **paths, char *fill_path, char *final_path)
 	return (NULL);
 }
 
-void	free_all(int pipe_data[2], int fd_file, char **cmd, char *path)
+void	free_all(int pipe_data[2], t_exec trash)
 {
 	int	set_errno;
 
 	set_errno = errno;
 	close(pipe_data[0]);
 	close(pipe_data[1]);
-	close(fd_file);
-	if (path)
-		free(path);
-	free_split(cmd);
+	close(trash.file);
+	if (trash.path)
+		free(trash.path);
+	free_split(trash.cmd);
 	errno = set_errno;
 }
 

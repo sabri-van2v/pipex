@@ -24,11 +24,18 @@
 # include <stdlib.h>
 # include <errno.h>
 
+typedef struct s_exec
+{
+	char	**cmd;
+	char	*path;
+	int		file;
+}	t_exec;
+
 void	free_split(char **split);
 
 void	*free_path(char **paths, char *fill_path, char *final_path);
 
-void	free_all(int pipe_data[2], int fd_file, char **cmd, char *path);
+void	free_all(int pipe_data[2], t_exec trash);
 
 void	error_message(void);
 
@@ -50,11 +57,13 @@ char	*find_path(char	*env, char *cmd);
 
 char	*path_for_execve(char **env, char *cmd);
 
-void	check_access(char **argv);
+void	child(char **env, int pipe_data[2], t_exec p1);
 
-void	child(char **argv, char **env, int pipe_data[2]);
+void	last_child(char **env, int pipe_data[2], t_exec p2);
 
-void	parent(int argx, char **argv, char **env, int pipe_data[2]);
+void	execute_child(char **argv, char **env, int pipe_data[2]);
+
+void	execute_last_child(int argc, char **argv, char **env, int pipe_data[2]);
 
 int		main(int argc, char **argv, char **env);
 

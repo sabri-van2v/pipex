@@ -50,5 +50,6 @@ void	many_pipes(int argc, char **argv, char **env, int *pipe_data)
 		close(pipe_link[0]);
 		i++;
 	}
-	waitpid(pid, NULL, 1);
+	if (waitpid(pid, NULL, 1) == -1)
+		error_message();
 }

@@ -24,7 +24,7 @@ INCLUDES = Libft/includes/gnl Libft/includes/libc Libft/includes/ptf includes/
 
 HEADER = includes/pipex.h
 
-binaries/%.o: srcs/%.c ${HEADER} libft | binaries
+binaries/%.o: srcs/%.c ${HEADER} Libft/libft.a | binaries
 	${CC} ${CFLAGS} -c $< -o $@ ${addprefix -I, ${INCLUDES}}
 
 ${NAME}: ${OBJS}
@@ -32,7 +32,7 @@ ${NAME}: ${OBJS}
 
 all: ${NAME}
 
-libft:
+Libft/libft.a:
 	${MAKELIB}
 
 binaries:
