@@ -24,9 +24,9 @@ void	pass(char *argv, char **env, int pipe_link[2], int pipe_data)
 		error_message();
 	path = path_for_execve(env, cmd[0]);
 	if (!path || dup2(pipe_data, 0) == -1 || dup2(pipe_link[1], 1) == -1)
-		error_message();
+		(free(cmd), error_message());
 	if (execve(path, cmd, env) == -1)
-		error_message();
+		(free_all(NULL, -1, cmd, path), error_message());
 }
 
 void	many_pipes(int argc, char **argv, char **env, int *pipe_data)
@@ -42,14 +42,14 @@ void	many_pipes(int argc, char **argv, char **env, int *pipe_data)
 			error_message();
 		pid = fork();
 		if (pid == -1)
-			error_message();
+			(close(pipe_link[1]), close(pipe_link[0]), error_message());
 		if (pid == 0)
 			pass(argv[i], env, pipe_link, *pipe_data);
-		dup2(pipe_link[0], *pipe_data);
-		close(pipe_link[1]);
-		close(pipe_link[0]);
+		if (waitpid(pid, NULL, 0) == -1)
+			(close(pipe_link[1]), close(pipe_link[0]), error_message());
+		if (dup2(pipe_link[0], *pipe_data) == -1 || close(pipe_link[1]) == -1
+			|| close(pipe_link[0]) == -1)
+			(free_all(pipe_data, pipe_link[0], NULL, NULL), error_message());
 		i++;
 	}
-	if (waitpid(pid, NULL, 1) == -1)
-		error_message();
 }
