@@ -1,8 +1,0 @@
-binaries
-file1.txt
-file2.txt
-includes
-Libft
-Makefile
-pipex
-srcs

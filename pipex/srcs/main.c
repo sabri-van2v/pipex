@@ -62,6 +62,8 @@ int	open_file(int argc, char **argv, int pipe_data[2], int flag)
 	}
 	else
 	{
+		if (access(argv[argc - 1], F_OK))
+			perror("The program detected an error ");
 		file = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (file == -1)
 			(free_all(pipe_data, -1, NULL, NULL), error_message());
