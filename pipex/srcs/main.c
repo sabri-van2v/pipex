@@ -23,8 +23,7 @@ void	child(int file, char **argv, char **env, int pipe_data[2])
 	if (!cmd)
 		(free_all(pipe_data, file, NULL, NULL), error_message());
 	path = path_for_execve(env, cmd[0]);
-	if (!path || dup2(pipe_data[1], 1) == -1 || dup2(file, 0) == -1
-		|| close(pipe_data[0]) == -1)
+	if (!path || dup2(pipe_data[1], 1) == -1 || dup2(file, 0) == -1)
 		(free_all(pipe_data, file, cmd, NULL), error_message());
 	if (execve(path, cmd, env) == -1)
 		(free_all(pipe_data, file, cmd, path), error_message());
@@ -51,6 +50,25 @@ void	last_child(int file, char **argv, char **env, int pipe_data[2])
 		(free_all(pipe_data, file, cmd, path), error_message());
 }
 
+int	open_file(int argc, char **argv, int pipe_data[2], int flag)
+{
+	int	file;
+
+	if (flag == 0)
+	{
+		file = open(argv[1], O_RDONLY);
+		if (file == -1)
+			return (perror("The program detected an error "), -1);
+	}
+	else
+	{
+		file = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if (file == -1)
+			(free_all(pipe_data, -1, NULL, NULL), error_message());
+	}
+	return (file);
+}
+
 void	execute_fork(int argc, char **argv, char **env, int pipe_data[2])
 {
 	pid_t		pid;
@@ -58,11 +76,11 @@ void	execute_fork(int argc, char **argv, char **env, int pipe_data[2])
 	int			file;
 
 	if (call == 0)
-		file = open(argv[1], O_RDONLY);
+		file = open_file(argc, argv, pipe_data, 0);
 	else
-		file = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		file = open_file(argc, argv, pipe_data, 1);
 	if (file == -1)
-		(free_all(pipe_data, -1, NULL, NULL), error_message());
+		return ((void)call++);
 	pid = fork();
 	if (pid == -1)
 		(free_all(pipe_data, file, NULL, NULL), error_message());

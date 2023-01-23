@@ -55,6 +55,8 @@ void	child(int file, char **argv, char **env, int pipe_data[2]);
 
 void	last_child(int file, char **argv, char **env, int pipe_data[2]);
 
+int		open_file(int argc, char **argv, int pipe_data[2], int flag);
+
 void	execute_fork(int argc, char **argv, char **env, int pipe_data[2]);
 
 int		main(int argc, char **argv, char **env);
