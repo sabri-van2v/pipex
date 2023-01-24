@@ -12,6 +12,17 @@
 
 #include "pipex.h"
 
+int	is_empty_string(char **argv)
+{
+	int	i;
+
+	i = -1;
+	while (argv[++i])
+		if (argv[i][0] == '\0')
+			return (1);
+	return (0);
+}
+
 void	free_split(char **split)
 {
 	int	i;

@@ -24,6 +24,8 @@
 # include <stdlib.h>
 # include <errno.h>
 
+int		is_empty_string(char **argv);
+
 void	free_split(char **split);
 
 void	*free_path(char **paths, char *fill_path, char *final_path);

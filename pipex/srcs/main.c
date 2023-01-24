@@ -101,7 +101,7 @@ int	main(int argc, char **argv, char **env)
 	int		i;
 
 	i = -1;
-	if (argc < 5)
+	if (argc < 5 || is_empty_string(argv))
 		return (ft_putstr_fd("Bad arguments\n", 2), 1);
 	if (!ft_strncmp("here_doc", argv[1], 8)
 		&& ft_strlen(argv[1]) == 8 && argc == 6)
