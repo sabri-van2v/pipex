@@ -62,8 +62,6 @@ int	open_file(int argc, char **argv, int pipe_data[2], int flag)
 	}
 	else
 	{
-		if (access(argv[argc - 1], F_OK))
-			perror("The program detected an error ");
 		file = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (file == -1)
 			(free_all(pipe_data, -1, NULL, NULL), error_message());
@@ -94,15 +92,15 @@ void	execute_fork(int argc, char **argv, char **env, int pipe_data[2])
 			return (last_child(file, argv, env, pipe_data));
 	}
 	call++;
-	if (waitpid(pid, NULL, 0) == -1)
-		(free_all(pipe_data, file, NULL, NULL), error_message());
 	close(file);
 }
 
 int	main(int argc, char **argv, char **env)
 {
 	int		pipe_data[2];
+	int		i;
 
+	i = -1;
 	if (argc < 5)
 		return (ft_putstr_fd("Bad arguments\n", 2), 1);
 	if (!ft_strncmp("here_doc", argv[1], 8)
@@ -115,6 +113,9 @@ int	main(int argc, char **argv, char **env)
 		(close(pipe_data[0]), error_message());
 	many_pipes(argc, argv, env, &pipe_data[0]);
 	execute_fork(argc, argv, env, pipe_data);
+	while (++i < argc - 3)
+		if (waitpid(-1, NULL, 0) == -1 && !access(argv[1], R_OK))
+			error_message();
 	if (close(pipe_data[0]) == -1)
 		error_message();
 }

@@ -45,8 +45,6 @@ void	many_pipes(int argc, char **argv, char **env, int *pipe_data)
 			(close(pipe_link[1]), close(pipe_link[0]), error_message());
 		if (pid == 0)
 			pass(argv[i], env, pipe_link, *pipe_data);
-		if (waitpid(pid, NULL, 0) == -1)
-			(close(pipe_link[1]), close(pipe_link[0]), error_message());
 		if (dup2(pipe_link[0], *pipe_data) == -1 || close(pipe_link[1]) == -1
 			|| close(pipe_link[0]) == -1)
 			(free_all(pipe_data, pipe_link[0], NULL, NULL), error_message());
