@@ -80,8 +80,9 @@ int	here_doc(char **argv, char **env)
 		(free_all(pipe_data, -1, NULL, NULL), error_message());
 	if (pid == 0)
 		return (child_here_doc(pipe_data, argv));
-	if (waitpid(pid, NULL, 1) == -1 || close(pipe_data[1]) == -1)
+	if (close(pipe_data[1]) == -1)
 		(free_all(pipe_data, -1, NULL, NULL), error_message());
+	many_pipes(6, argv, env, &pipe_data[0]);
 	file = open(argv[5], O_WRONLY | O_APPEND | O_CREAT, 0644);
 	if (file == -1)
 		(free_all(pipe_data, -1, NULL, NULL), error_message());
@@ -90,8 +91,7 @@ int	here_doc(char **argv, char **env)
 		(free_all(pipe_data, file, NULL, NULL), error_message());
 	if (pid == 0)
 		last_child_here_doc(file, pipe_data, argv, env);
-	if (waitpid(pid, NULL, 0) == -1)
+	if (waitpid(-1, NULL, 0) == -1)
 		(free_all(pipe_data, file, NULL, NULL), error_message());
-	free_all(pipe_data, file, NULL, NULL);
-	return (0);
+	return (free_all(pipe_data, file, NULL, NULL), 0);
 }
