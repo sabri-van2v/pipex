@@ -23,7 +23,8 @@ void	pass(char *argv, char **env, int pipe_link[2], int pipe_data)
 	if (!cmd)
 		error_message();
 	path = path_for_execve(env, cmd[0]);
-	if (!path || dup2(pipe_data, 0) == -1 || dup2(pipe_link[1], 1) == -1)
+	if (!path || dup2(pipe_data, 0) == -1 || dup2(pipe_link[1], 1) == -1
+		|| close(pipe_link[0]) == -1)
 		(free(cmd), error_message());
 	if (execve(path, cmd, env) == -1)
 		(free_all(NULL, -1, cmd, path), error_message());

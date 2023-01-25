@@ -23,7 +23,8 @@ void	child(int file, char **argv, char **env, int pipe_data[2])
 	if (!cmd)
 		(free_all(pipe_data, file, NULL, NULL), error_message());
 	path = path_for_execve(env, cmd[0]);
-	if (!path || dup2(pipe_data[1], 1) == -1 || dup2(file, 0) == -1)
+	if (!path || dup2(pipe_data[1], 1) == -1 || dup2(file, 0) == -1
+		|| close(pipe_data[0]) == -1)
 		(free_all(pipe_data, file, cmd, NULL), error_message());
 	if (execve(path, cmd, env) == -1)
 		(free_all(pipe_data, file, cmd, path), error_message());
@@ -113,9 +114,9 @@ int	main(int argc, char **argv, char **env)
 		(close(pipe_data[0]), error_message());
 	many_pipes(argc, argv, env, &pipe_data[0]);
 	execute_fork(argc, argv, env, pipe_data);
+	if (close(pipe_data[0]) == -1)
+		error_message();
 	while (++i < argc - 3)
 		if (waitpid(-1, NULL, 0) == -1 && !access(argv[1], R_OK))
 			error_message();
-	if (close(pipe_data[0]) == -1)
-		error_message();
 }
